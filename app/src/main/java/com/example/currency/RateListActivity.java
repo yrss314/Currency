@@ -6,9 +6,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,7 +29,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 //public class List extends ListActivity {
 
@@ -41,18 +49,19 @@ import java.util.List;
 //        setListAdapter(adapter);
 //    }
 //}
-public class RateListActivity extends ListActivity implements Runnable {
+public class RateListActivity extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener {
     Handler handler;
-    //ListView listview;
+    ListView listview;
     float dollarRate = (float) 0.1465;
     float euroRate = (float) 0.1259;
     float wonRate = (float) 171.7179;
-
+    ArrayList<HashMap<String, String>> listItems;
+    SimpleAdapter listItemAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_list);
+        setContentView(R.layout.activity_list);
         //ListView listView = (ListView) findViewById(R.id.mylist1);
 
         //String[] list_data={"one","two","three","four","five"};
@@ -60,6 +69,7 @@ public class RateListActivity extends ListActivity implements Runnable {
 
         //ListAdapter adapter=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,list_data);
         //listView.setAdapter(adapter);
+        listview = (ListView) findViewById(R.id.my_list);
         Thread t1= new Thread(this);
         t1.start();
 
@@ -68,16 +78,34 @@ public class RateListActivity extends ListActivity implements Runnable {
 
             public void handleMessage(Message msg) {
                 if (msg.what == 5) {
-                    List<String> list2 = (List<String>) msg.obj;
-                    ListAdapter adapter = new ArrayAdapter<String>(
-                            RateListActivity.this,
-                            android.R.layout.simple_list_item_1,
-                            list2);
-                    setListAdapter(adapter);
+                    //List<String> list2 = (List<String>) msg.obj;
+                    //ListAdapter adapter = new ArrayAdapter<String>(
+                            //RateListActivity.this,
+                            //android.R.layout.simple_list_item_1,
+                            //list2);
+                    //setListAdapter(adapter);
+
+                    ArrayList<HashMap<String, String>> list2 = (ArrayList<HashMap<String, String>>) msg.obj;
+                    // 生成适配器的 Item 和动态数组对应的元素
+                    System.out.println(list2);
+                    listItemAdapter = new SimpleAdapter(RateListActivity.this,
+                            list2, // listItems 数据源
+                            R.layout.hangbuju, // ListItem 的 XML 布局实现
+                            new String[]{"ItemTitle", "ItemDetail"},
+                            new int[]{R.id.itemTitle, R.id.itemDetail}
+                    );
+                    //setListAdapter(listItemAdapter);
+                    listview.setAdapter(listItemAdapter);
                 }
                 super.handleMessage(msg);
             }
         };
+
+
+        listview.setOnItemClickListener(this);
+
+
+
     }
 
     @Override
@@ -86,7 +114,10 @@ public class RateListActivity extends ListActivity implements Runnable {
         //Message msg = handler.obtainMessage(5);
         //msg.obj="Hello from run()";
         //handler.sendMessage(msg);
-        List<String> temp=null;
+
+
+        HashMap<String, String> temp = new HashMap<String, String>();
+        //List<String> temp=null;
 
         URL url = null;
         try {
@@ -100,13 +131,27 @@ public class RateListActivity extends ListActivity implements Runnable {
             //Message msg = handler.obtainMessage(5);
             temp=useJsoup(html);
             //handler.sendMessage(msg);
+            listItems = new ArrayList<HashMap<String, String>>();
+
+
+
+            //System.out.println("通过Map.keySet遍历key和value：");
+            for (String key : temp.keySet()) {
+                HashMap<String, String> map = new HashMap<String,String>();
+                map.put("ItemTitle", key); // 标题文字
+                map.put("ItemDetail", temp.get(key)); // 详情描述
+                listItems.add(map);
+
+            }
+            System.out.println(listItems);
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
         Message msg = handler.obtainMessage(5);
-        msg.obj=temp;
+        msg.obj=listItems;
         handler.sendMessage(msg);
     }
 
@@ -125,7 +170,7 @@ public class RateListActivity extends ListActivity implements Runnable {
         return out.toString();
     }
 
-    public List<String>  useJsoup(String str) {
+    public HashMap<String, String>  useJsoup(String str) {
         //Document doc = Jsoup.parse(str);
         //Elements trs=doc.select("table").get(0).select("tr");
 
@@ -148,6 +193,8 @@ public class RateListActivity extends ListActivity implements Runnable {
         //Log.i("thread","run"+t3str+"==>"+dollarRate);
         //把数据转为字符串，然后输出到日志之中
 
+        HashMap<String, String> map = new HashMap<String, String>();
+
         List<String> form=new ArrayList();
         Document doc = Jsoup.parse(str);
         Elements tables = doc.getElementsByTag("table");
@@ -163,8 +210,30 @@ public class RateListActivity extends ListActivity implements Runnable {
             String prior=str1+"==>"+val;
             form.add(prior);
 
+            map.put(str1,val);
+
         }
-        return form;
+        //return form;
+        return map;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Object itemAtPosition = listview.getItemAtPosition(position);
+        //通过map获取数据
+        //HashMap<String,String> map = (HashMap<String, String>) itemAtPosition;
+        //String titleStr = map.get("ItemTitle");
+        //String detailStr = map.get("ItemDetail");
+        //Log.i("thread", "onItemClick: titleStr=" + titleStr);
+        //Log.i("thread", "onItemClick: detailStr=" + detailStr);
+
+        //通过view获取数据
+        TextView title = (TextView) view.findViewById(R.id.itemTitle);
+        TextView detail = (TextView) view.findViewById(R.id.itemDetail);
+        String title2 = String.valueOf(title.getText());
+        String detail2 = String.valueOf(detail.getText());
+        Log.i("thread", "onItemClick: title2=" + title2);
+        Log.i("thread", "onItemClick: detail2=" + detail2);
 
     }
 }
