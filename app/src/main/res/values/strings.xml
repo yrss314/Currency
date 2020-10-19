@@ -10,4 +10,6 @@
     <string name="dollarRate">dollarRate</string>
     <string name="euroRate">euroRate</string>
     <string name="wonRate">wonRate</string>
+    <string name="show_msg1">Result</string>
+    <string name="show_msg2">Currency</string>
 </resources>

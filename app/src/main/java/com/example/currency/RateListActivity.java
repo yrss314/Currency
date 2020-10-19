@@ -2,6 +2,7 @@ package com.example.currency;
 
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -207,10 +208,11 @@ public class RateListActivity extends AppCompatActivity implements Runnable, Ada
             String val = td2.text();
             Log.i("thread", "run: " + str1 + "==>" + val);
             float v = 100f / Float.parseFloat(val);
-            String prior=str1+"==>"+val;
+            String v1=Float.toString(v);
+            String prior=str1+"==>"+v;
             form.add(prior);
 
-            map.put(str1,val);
+            map.put(str1,v1);
 
         }
         //return form;
@@ -235,5 +237,12 @@ public class RateListActivity extends AppCompatActivity implements Runnable, Ada
         Log.i("thread", "onItemClick: title2=" + title2);
         Log.i("thread", "onItemClick: detail2=" + detail2);
 
+        Intent intent=new Intent(this,Calculation.class);
+        Bundle bdl = new Bundle();
+        bdl.putString("currency",title2);
+        bdl.putString("rate",detail2);
+
+        intent.putExtras(bdl);
+        startActivity(intent);
     }
 }
