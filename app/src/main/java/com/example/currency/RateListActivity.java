@@ -1,7 +1,9 @@
 package com.example.currency;
 
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +16,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -50,7 +53,7 @@ import java.util.Set;
 //        setListAdapter(adapter);
 //    }
 //}
-public class RateListActivity extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener {
+public class RateListActivity extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener {
     Handler handler;
     ListView listview;
     float dollarRate = (float) 0.1465;
@@ -104,7 +107,7 @@ public class RateListActivity extends AppCompatActivity implements Runnable, Ada
 
 
         listview.setOnItemClickListener(this);
-
+        listview.setOnItemLongClickListener(this);
 
 
     }
@@ -244,5 +247,26 @@ public class RateListActivity extends AppCompatActivity implements Runnable, Ada
 
         intent.putExtras(bdl);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示")
+                .setMessage("请确认是否删除当前数据")
+                .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.i("thread", "onClick: 对话框事件处理");
+                        //删除数据项
+                        listItems.remove(position);
+                        //更新适配器
+                        listItemAdapter.notifyDataSetChanged();
+                    }
+                }).setNegativeButton("否", null);
+        builder.create().show();
+        return true;
     }
 }
