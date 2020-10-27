@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -27,6 +28,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static java.sql.Types.NULL;
+
 public class MainActivity extends AppCompatActivity implements Runnable {
     TextView out;
     EditText edit;
@@ -41,12 +44,17 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     //editor.apply();
     Handler handler;
     //Runnable aa=new MainActivity();
+    DBHelper dbHelp;
+    SQLiteDatabase sdb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //handler.postDelayed(this, 1000);
+        dbHelp =new DBHelper(MainActivity.this);
+        sdb = dbHelp.getWritableDatabase(); // 创建 or 打开 可读/写的数据库
+
         out=findViewById(R.id.out);
         edit=findViewById(R.id.editTextTextPersonName2);
 
@@ -68,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         editor.putFloat("euro_rate",euroRate);
         editor.putFloat("won_rate",wonRate);
         editor.apply();
+
 
 
     }
